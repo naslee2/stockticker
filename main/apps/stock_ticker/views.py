@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
 from .models import *
-import bcrypt
+import bcrypt, requests
 
 def index(request): #Index Page
   return render(request, "index.html")
@@ -46,3 +46,36 @@ def login(request):
 def logout(request):
   request.session.clear()
   return redirect('/index')
+
+
+
+
+    # stock_data = {}
+    #   crypto_data = {}
+    #   fx_data = {}
+
+    #   stock_data['function'] = "TIME_SERIES_DAILY_ADJUSTED"
+    #   stock_data['symbol'] = "RTN"
+
+    #   crypto_data['function'] = "DIGITAL_CURRENCY_INTRADAY"
+    #   crypto_data['market'] = "EUR"
+    #   crypto_data['symbol'] = "BTC"
+
+    #   fx_data['function'] = "CURRENCY_EXCHANGE_RATE"
+    #   fx_data['from_currency'] = "USD"
+    #   fx_data['to_currency'] = "JPY"
+
+    #   stock_response = requests.get("https://www.alphavantage.co/query?function="+stock_data['function']+"&symbol="+stock_data['symbol']+"&apikey=67ZBM9BPG298O6TL")
+
+    #   crypto_response = requests.get("https://www.alphavantage.co/query?function="+crypto_data['function']+"&symbol="+crypto_data['symbol']+"&market="+crypto_data['market']+"&apikey=67ZBM9BPG298O6TL")
+
+    #   fx_response = requests.get("https://www.alphavantage.co/query?function="+fx_data['function']+"&from_currency="+fx_data['from_currency']+"&to_currency="+fx_data['to_currency']+"&apikey=67ZBM9BPG298O6TL")
+
+    #   request.session['stocks'] = stock_response
+    #   request.session['cryptos'] = crypto_response
+    #   request.session['fxs'] = fx_response
+    #   context = {
+    #     'stocks': request.session['stocks'],
+    #     'cryptos': request.session['cryptos'],
+    #     'fxs': request.session['fxs'],
+    #   }
