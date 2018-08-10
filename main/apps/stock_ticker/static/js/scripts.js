@@ -1,10 +1,34 @@
-var data = {};
-// var crypto_data = {};
-// var fx_data = {};
+var stock_data = {};
 
 $(document).ready(function(){
-    data.symbol = "RTN";
-    data.function = "TIME_SERIES_DAILY_ADJUSTED";
+    stock_data.symbol = "RTN";
+    stock_data.function = "TIME_SERIES_DAILY";
+
+    $("form").submit(function(e){
+        e.preventDefault();
+        stock_data.symbol = $("#symbol").val();
+        stock_data.function  = $("#time_series option:selected").val();
+        stocks();
+    })
+
+    // setInterval(function(){
+    //     stocks();
+    // }, 600000);
+});
+
+function stocks(){
+    $.getJSON("https://www.alphavantage.co/query?function="+stock_data.function+"&symbol="+stock_data.symbol+"&apikey=67ZBM9BPG298O6TL", function(request) {
+            if(request['Error Message']){
+                console.log(request['Error Message'])
+            }
+            else{
+                console.log(request); 
+            }
+        });
+}
+
+// var crypto_data = {};
+// var fx_data = {};
 
     // crypto_data.function = "DIGITAL_CURRENCY_INTRADAY";
     // crypto_data.market = "EUR";
@@ -13,22 +37,6 @@ $(document).ready(function(){
     // fx_data.function = "CURRENCY_EXCHANGE_RATE"
     // fx_data.from_currency = "USD"
     // fx_data.to_currency = "JPY"
-
-    stocks();
-    // crypto();
-    // fx();
-
-    // setInterval(function(){
-    //     stocks();
-    // }, 600000);
-
-});
-
-function stocks(){
-    $.getJSON("https://www.alphavantage.co/query?function="+data.function+"&symbol="+data.symbol+"&apikey=67ZBM9BPG298O6TL", function(request) {
-            console.log(data.function, request);
-        }, "json");
-}
 
 // function crypto(){
 //     $.getJSON("https://www.alphavantage.co/query?function="+crypto_data.function+"&symbol="+crypto_data.symbol+"&market=EUR&apikey=67ZBM9BPG298O6TL", function(request) {
