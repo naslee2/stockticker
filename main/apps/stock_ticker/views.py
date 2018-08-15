@@ -3,11 +3,14 @@ from django.contrib import messages
 from django.core import serializers
 from django.http import JsonResponse
 from .models import *
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure
 from bokeh.resources import CDN
 from bokeh.embed import components
-import bcrypt, requests, json, math
-
+from bokeh.layouts import gridplot, column
+from bokeh.models import ColumnDataSource, HoverTool,DatetimeTickFormatter
+import bcrypt, requests, json
+import pandas as pd
+import numpy as np
 
 def index(request): #Index Page
   return render(request, "index.html")
@@ -34,27 +37,49 @@ def result(request):
     data = request.session['stock_data']
     meta = request.session['meta_data']
     for key, value in sorted(data.items()):
-      date.append(key)
+      date.append(str(key))
       for key2, value2 in sorted(value.items()):
         if key2 == '1. open':
-          open_data.append(value2)
+          open_data.append(float(value2))
         if key2 == '2. high':
-          high.append(value2)
+          high.append(float(value2))
         if key2 == '3. low':
-          low.append(value2)
+          low.append(float(value2))
         if key2 == '4. close':
-          close.append(value2)
+          close.append(float(value2))
         if key2 == '5. volume':
-          volume.append(value2)
+          volume.append(int(value2))
 
-    plot = figure()
-    plot.circle([1,2], [3,4])
+    np_date = np.array(date, dtype=np.datetime64)
 
+    source = ColumnDataSource(data=dict(
+      date=np_date,
+      close=close,
+      volume=volume
+    ))
+
+    plot = figure(plot_height=650, plot_width=900, x_axis_type="datetime", title="Closing Prices for "+meta['2. Symbol']+" at "+meta['3. Last Refreshed'])
+
+    plot.grid.grid_line_alpha=0.3
+    plot.xaxis.axis_label = 'Date'
+    plot.yaxis.axis_label = 'Price'
+
+    plot.add_tools(HoverTool(
+    tooltips=[
+        ('date','@date{%F}'),
+        ("Close","@close"),
+        ("Volume", "@volume"),
+    ],
+
+    formatters={
+        'date':'datetime', # use 'datetime' formatter for 'date' field
+    }))
+
+    plot.line(x='date', y='close', color='#A6CEE3', source=source)
+   
     script, div = components(plot, CDN)
 
-
-
-    return render(request, 'result.html', {"the_script": script, "the_div": div})
+    return render(request, 'result.html', {'the_script': script, 'the_div': div})
 
 
 def update(request):
@@ -121,31 +146,3 @@ def login(request):
 def logout(request):
   request.session.clear()
   return redirect('/index')
-
-  #################
-
-    # stock_options = {}
-    # crypto_options = {}
-    # fx_options = {}
-
-    # stock_options['function'] = "TIME_SERIES_DAILY_ADJUSTED"
-    # stock_options['symbol'] = "RTN"
-
-    # crypto_options['function'] = "DIGITAL_CURRENCY_INTRADAY"
-    # crypto_options['market'] = "EUR"
-    # crypto_options['symbol'] = "BTC"
-
-    # fx_options['function'] = "CURRENCY_EXCHANGE_RATE"
-    # fx_options['from_currency'] = "USD"
-    # fx_options['to_currency'] = "JPY"
-
-    # stock_object = requests.get("https://www.alphavantage.co/query?function="+stock_options['function']+"&symbol="+stock_options['symbol']+"&apikey=67ZBM9BPG298O6TL")
-    # obj = stock_object.json()
-
-    # daily_data = obj['Time Series (Daily)']
-    # for x in daily_data:
-    #   print "Daily Close", daily_data[x]['4. close']
-
-    # crypto_response = serializers.serialize('json',requests.get("https://www.alphavantage.co/query?function="+crypto_data['function']+"&symbol="+crypto_options['symbol']+"&market="+crypto_options['market']+"&apikey=67ZBM9BPG298O6TL"))
-
-    # fx_response = serializers.serialize('json',requests.get("https://www.alphavantage.co/query?function="+fx_options['function']+"&from_currency="+fx_options['from_currency']+"&to_currency="+fx_options['to_currency']+"&apikey=67ZBM9BPG298O6TL"))
