@@ -58,7 +58,7 @@ def result(request):
       volume=volume
     ))
 
-    plot = figure(plot_height=650, plot_width=900, x_axis_type="datetime", title="Closing Prices for "+meta['2. Symbol']+" at "+meta['3. Last Refreshed'])
+    plot = figure(plot_height=650, plot_width=1200, x_axis_type="datetime", title="Closing Prices for "+meta['2. Symbol']+" at "+meta['3. Last Refreshed'])
 
     plot.grid.grid_line_alpha=0.3
     plot.xaxis.axis_label = 'Date'
@@ -78,8 +78,9 @@ def result(request):
     plot.line(x='date', y='close', color='#A6CEE3', source=source)
    
     script, div = components(plot, CDN)
-
-    return render(request, 'result.html', {'the_script': script, 'the_div': div})
+    context = {'the_script': script, 'the_div': div}
+    return JsonResponse(context)
+    # return render(request, 'result.html', {'the_script': script, 'the_div': div})
 
 
 def update(request):
@@ -105,8 +106,11 @@ def update(request):
           request.session['stock_data'] = obj[x]
         elif x == 'Monthly Time Series':
           request.session['stock_data'] = obj[x]
+      print "@@@@@@@@@@@@ /result"
       return redirect('/result')
   else:
+
+    print "@@@@@@@@@@@@ /dashboard"
     return redirect('/dashboard')
 
 

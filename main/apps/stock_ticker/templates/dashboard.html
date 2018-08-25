@@ -5,22 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <!-- <script type="text/javascript" src="../static/js/scripts.js"></script> -->
-    
+    <script src="https://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
+    <script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.13.0.min.js"></script>
+   
     <title>Dashboard</title>
 </head>
 <body>
     <a href="/logout">Logout</a>
-    <form action="/dashboard/update", method="POST">
+    <form action="/dashboard/update", method="POST" id="update_data">
         {% csrf_token %}
         Symbol: <input type="text" id="symbol" name="symbol" value="RTN"><br>
         Time: <select name="time_series" id="time_series">
             <option id="daily" value="TIME_SERIES_DAILY">Daily</option>
             <option id="weekly" value="TIME_SERIES_WEEKLY">Weekly</option>
             <option id="monthly" value="TIME_SERIES_MONTHLY">Monthly</option>
-          </select><br>
+            </select><br>
         <input type="submit" id="submit" name="submit" value="Submit">
     </form>
-    <p></p>
 </body>
+
+<div id="graph_data">
+        {{ the_div|safe }}
+        {{ the_script|safe }}
+</div>
+
+<script>
+        $("#update_data").click(function(){
+            $.ajax({
+                url: "/dashboard/update", 
+                data: { CSRF: getCSRFTokenValue()},
+                method: "POST", 
+                success: function(result){
+                    console.log(result)
+                // var bokeh_data = JSON.parse(result);
+                // $("#graph_data").html(bokeh_data.the_div);
+                // $("#graph_data").append(bokeh_data.the_script);
+            }});
+            return false;
+        });
+    </script>
 </html>
