@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
     <script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
     <script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.13.0.min.js"></script>
    
@@ -26,22 +26,24 @@
 </body>
 
 <div id="graph_data">
-        {{ the_div|safe }}
-        {{ the_script|safe }}
+
 </div>
 
 <script>
-        $("#update_data").click(function(){
+        $("#update_data").submit(function(){
+            var form_data = $('#update_data')
             $.ajax({
                 url: "/dashboard/update", 
-                data: { CSRF: getCSRFTokenValue()},
-                method: "POST", 
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": '{{csrf_token}}'
+                },
+                data: form_data.serialize(),
                 success: function(result){
-                    console.log(result)
-                // var bokeh_data = JSON.parse(result);
-                // $("#graph_data").html(bokeh_data.the_div);
-                // $("#graph_data").append(bokeh_data.the_script);
-            }});
+                    $("#graph_data").html(result);
+                }, 
+                dataType: 'html'
+            });
             return false;
         });
     </script>

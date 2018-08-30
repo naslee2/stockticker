@@ -7,7 +7,7 @@ from bokeh.plotting import figure
 from bokeh.resources import CDN
 from bokeh.embed import components
 from bokeh.layouts import gridplot, column
-from bokeh.models import ColumnDataSource, HoverTool,DatetimeTickFormatter
+from bokeh.models import ColumnDataSource, HoverTool,DatetimeTickFormatter, Slider, CustomJS
 import bcrypt, requests, json
 import pandas as pd
 import numpy as np
@@ -32,7 +32,7 @@ def result(request):
   if 'id' not in request.session:
     return redirect('/index')
   elif 'meta_data' not in request.session:
-    return redirect('/dashboard')
+    return HttpResponse("Invalid Request!")
   else:
     data = request.session['stock_data']
     meta = request.session['meta_data']
@@ -51,19 +51,16 @@ def result(request):
           volume.append(int(value2))
 
     np_date = np.array(date, dtype=np.datetime64)
-
     source = ColumnDataSource(data=dict(
       date=np_date,
       close=close,
       volume=volume
     ))
 
-    plot = figure(plot_height=650, plot_width=1200, x_axis_type="datetime", title="Closing Prices for "+meta['2. Symbol']+" at "+meta['3. Last Refreshed'])
-
+    plot = figure(plot_height=600, plot_width=1000, x_axis_type="datetime",toolbar_location="above", title="Closing Prices for "+meta['2. Symbol']+" at "+meta['3. Last Refreshed'])
     plot.grid.grid_line_alpha=0.3
     plot.xaxis.axis_label = 'Date'
     plot.yaxis.axis_label = 'Price'
-
     plot.add_tools(HoverTool(
     tooltips=[
         ('date','@date{%F}'),
@@ -73,14 +70,14 @@ def result(request):
 
     formatters={
         'date':'datetime', # use 'datetime' formatter for 'date' field
-    }))
+    },
+    mode='vline'
+    ));
 
     plot.line(x='date', y='close', color='#A6CEE3', source=source)
    
     script, div = components(plot, CDN)
-    context = {'the_script': script, 'the_div': div}
-    return JsonResponse(context)
-    # return render(request, 'result.html', {'the_script': script, 'the_div': div})
+    return render(request, 'stock_result.html', {'the_script': script, 'the_div': div})
 
 
 def update(request):
@@ -95,7 +92,7 @@ def update(request):
     obj = stock_object.json()
 
     if 'Meta Data' not in obj:
-      return redirect('/dashboard')
+      return HttpResponse("Invalid Request!")
     else:
       for x in obj:
         if x == 'Meta Data':
@@ -109,10 +106,9 @@ def update(request):
       print "@@@@@@@@@@@@ /result"
       return redirect('/result')
   else:
-
     print "@@@@@@@@@@@@ /dashboard"
-    return redirect('/dashboard')
-
+    return HttpResponse("Invalid Request!")
+    # return redirect('/dashboard')
 
 
 
