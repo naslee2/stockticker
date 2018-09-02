@@ -15,7 +15,7 @@
     <a href="/logout">Logout</a>
     <form action="/dashboard/update", method="POST" id="update_data">
         {% csrf_token %}
-        Symbol: <input type="text" id="symbol" name="symbol" value="RTN"><br>
+        Symbol: <input type="text" id="symbol" name="symbol" value=""><br>
         Time: <select name="time_series" id="time_series">
             <option id="daily" value="TIME_SERIES_DAILY">Daily</option>
             <option id="weekly" value="TIME_SERIES_WEEKLY">Weekly</option>
@@ -28,8 +28,7 @@
 <div id="graph_data">
 
 </div>
-
-<script>
+    <script>
         $("#update_data").submit(function(){
             var form_data = $('#update_data')
             $.ajax({

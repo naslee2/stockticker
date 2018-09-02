@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
 from django.core import serializers
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from .models import *
 from bokeh.plotting import figure
 from bokeh.resources import CDN
@@ -22,18 +22,19 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 def result(request):
-  date = []
-  open_data = []
-  high = []
-  low = []
-  close = []
-  volume = []
-
   if 'id' not in request.session:
     return redirect('/index')
   elif 'meta_data' not in request.session:
     return HttpResponse("Invalid Request!")
+  elif not request.is_ajax():
+    return HttpResponseBadRequest("Access Denied!")
   else:
+    date = []
+    open_data = []
+    high = []
+    low = []
+    close = []
+    volume = []
     data = request.session['stock_data']
     meta = request.session['meta_data']
     for key, value in sorted(data.items()):
@@ -77,6 +78,7 @@ def result(request):
     plot.line(x='date', y='close', color='#A6CEE3', source=source)
    
     script, div = components(plot, CDN)
+    # return JsonResponse({'the_script': script, 'the_div': div})
     return render(request, 'stock_result.html', {'the_script': script, 'the_div': div})
 
 
